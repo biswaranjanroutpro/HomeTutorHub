@@ -10,7 +10,11 @@
 
     <div class="container mt-4">
       <form action="/users/login" method="post" class="needs-validation" novalidate>
-        
+        <% if (locals.errMsg) { %>
+          <div class="alert alert-danger" role="alert">
+            <%= errMsg %>
+          </div>
+          <% } %>
 
         <div class="mb-3">
           <label for="email" class="form-label"
@@ -42,11 +46,14 @@
           <div class="invalid-feedback">
             This field is required
           </div>
+          
 
         </div>
         <button type="submit" class="btn btn-primary">Login</button>
       </form>
     </div>
+
+    
 
         <%- include('partials/script') %>
 

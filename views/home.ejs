@@ -7,6 +7,11 @@
 <body style="background-color: black; color: white; ">
     <%- include('partials/nav') %>
     
+    <% if (locals.userFullName) { %>
+        <h1>Hello <%= userFullName%>! Welcome to Home Tutor Hub</h1>
+    <% } %>
+
+
     <%- include('partials/script') %>
 </body>
 </html>

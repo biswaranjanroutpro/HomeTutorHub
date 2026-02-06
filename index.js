@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 
 
@@ -59,21 +60,32 @@ app.use(express.json());
 // Routes
 
 // register
-app.get("/users/register", (req, res) => {
-    return res.render("register");
+app.get("/users/signup", (req, res) => {
+    return res.render("signup");
 });
 
-app.post("/users/register", async (req, res) => {
+app.post("/users/signup", async (req, res) => {
     const {fullName, email, password} = req.body;
 
     if(!fullName || !email || !password) {
         return res.status(400).send("all fields are required");
     }
 
-    await User.create({
+    const existingUser = await User.findOne({email});
+
+    if(existingUser) {
+        return res.status(400).json({msg: "user already exists"});
+    }
+
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+
+    const user = await User.create({
         fullName,
         email,
-        password
+        password: hashedPassword
     });
 
     return res.status(201).redirect("/");
@@ -91,17 +103,20 @@ app.post("/users/login",  async (req, res) => {
 
     if(!user) return res.json({msg: "no user found with given email"});
 
-    if(user.password !== password) {
-        return res.json({msg: "wrong password"});
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if(!isMatch) {
+        return res.status(401).render("login", {errMsg: "Password is doesn't matched, try again!"});
     }
     
-    return res.send("You are login");
+    return res.render("home", {userFullName: user.fullName});
 });
 
 
 
 
-// Test Route
+// Home Route
 app.get("/", (req, res) => {
     return res.render("home");
 });
